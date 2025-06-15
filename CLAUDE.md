@@ -58,3 +58,6 @@ Requires `.env` file with:
 - Backend: http://localhost:8000
 - Database: localhost:5432
 - Adminer (DB admin): http://localhost:8080
+
+## Task Management
+**IMPORTANT**: Always review the `todolist.md` file to track project progress. When implementing new functionality, add a checkmark (✅) to completed tasks in `todolist.md` to differentiate them from pending tasks. This helps maintain clear visibility of project status and completed work.
