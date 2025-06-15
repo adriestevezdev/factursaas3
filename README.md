@@ -22,8 +22,8 @@ Sistema de facturación SaaS con autenticación Clerk, construido con FastAPI y 
 
 3. **Levantar los servicios con Docker Compose**
    ```bash
-   docker-compose up -d
-   ```
+   docker compose up -d
+  ```
 
    Esto iniciará:
    - PostgreSQL en puerto 5432
@@ -46,7 +46,7 @@ factursaas2/
 │   │   └── middleware/ # Auth con Clerk
 │   └── Dockerfile.dev
 └── docker-compose.yml
-```
+`` 
 
 ## Arquitectura de Seguridad
 
@@ -60,7 +60,7 @@ factursaas2/
 
 El backend se recarga automáticamente con cambios. Para ver los logs:
 ```bash
-docker-compose logs -f backend
+docker compose logs -f backend
 ```
 
 API Docs disponibles en: http://localhost:8000/docs
@@ -69,14 +69,14 @@ API Docs disponibles en: http://localhost:8000/docs
 
 El frontend tiene hot-reload activado. Para ver los logs:
 ```bash
-docker-compose logs -f frontend
+docker compose logs -f frontend
 ```
 
 ### Base de Datos
 
 Para acceder a PostgreSQL:
 ```bash
-docker-compose exec postgres psql -U postgres -d factursaas
+docker compose exec postgres psql -U postgres -d factursaas
 ```
 
 ## Siguientes Pasos
