@@ -27,21 +27,21 @@
 ## 📋 Fase 2: Funcionalidades Core con Autenticación
 
 ### 1. CRUD de Clientes (Protegido por Usuario)
-- [ ] **API endpoints en Backend:**
-  - [ ] GET /api/clientes - Solo clientes del usuario autenticado
-  - [ ] POST /api/clientes - Asignar automáticamente `user_id`
-  - [ ] PUT /api/clientes/{id} - Verificar que el cliente pertenece al usuario
-  - [ ] DELETE /api/clientes/{id} - Verificar pertenencia
-- [ ] **Schemas Pydantic para validación**
+- [✅] **API endpoints en Backend:**
+  - [✅] GET /api/clientes - Solo clientes del usuario autenticado
+  - [✅] POST /api/clientes - Asignar automáticamente `user_id`
+  - [✅] PUT /api/clientes/{id} - Verificar que el cliente pertenece al usuario
+  - [✅] DELETE /api/clientes/{id} - Verificar pertenencia
+- [✅] **Schemas Pydantic para validación**
 - [ ] **Interfaz en Frontend:**
   - [ ] Lista filtrada por usuario actual
   - [ ] Formularios protegidos con `useAuth()`
   - [ ] Componentes de tabla y formularios
 
 ### 2. CRUD de Productos/Servicios (Protegido por Usuario)
-- [ ] **API endpoints con validación de pertenencia**
+- [✅] **API endpoints con validación de pertenencia**
 - [ ] **Interfaz con datos del usuario actual**
-- [ ] **Gestión de tipos de IVA**
+- [✅] **Gestión de tipos de IVA**
 
 ---
 
