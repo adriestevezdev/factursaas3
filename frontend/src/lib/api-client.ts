@@ -31,6 +31,11 @@ export function useApiClient() {
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
+    // Handle 204 No Content responses
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return {} as T;
+    }
+
     return response.json();
   };
 

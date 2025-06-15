@@ -6,9 +6,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development
 - `docker compose up -d`: Start all services (PostgreSQL, FastAPI backend, Next.js frontend)
+- `docker compose exec backend alembic upgrade head`: Run database migrations (required after first startup)
 - `docker compose logs -f backend`: View backend logs
 - `docker compose logs -f frontend`: View frontend logs
 - `docker compose exec postgres psql -U postgres -d factursaas`: Access PostgreSQL database
+
+### Database Seeding
+- **Create seed data**: `curl -X POST http://localhost:8000/seed/`
+- **Delete seed data**: `curl -X DELETE http://localhost:8000/seed/`
+- **Reset seed data**: `curl -X POST http://localhost:8000/seed/reset`
+- **Check seed stats**: `curl http://localhost:8000/seed/stats`
+- **Run seed script directly**: `docker compose exec backend python -m app.db.seed`
+- **Clean seed data directly**: `docker compose exec backend python -m app.db.seed cleanup`
+
+### Dashboard API
+- **Get dashboard stats**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/dashboard/stats`
+- Returns counts of clients, products, and invoices for the authenticated user
 
 ### Frontend (Next.js)
 - `npm run dev`: Development server (runs inside Docker)
