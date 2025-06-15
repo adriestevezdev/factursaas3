@@ -33,14 +33,14 @@
   - [✅] PUT /api/clientes/{id} - Verificar que el cliente pertenece al usuario
   - [✅] DELETE /api/clientes/{id} - Verificar pertenencia
 - [✅] **Schemas Pydantic para validación**
-- [ ] **Interfaz en Frontend:**
-  - [ ] Lista filtrada por usuario actual
-  - [ ] Formularios protegidos con `useAuth()`
-  - [ ] Componentes de tabla y formularios
+- [✅] **Interfaz en Frontend:**
+  - [✅] Lista filtrada por usuario actual
+  - [✅] Formularios protegidos con `useAuth()`
+  - [✅] Componentes de tabla y formularios
 
 ### 2. CRUD de Productos/Servicios (Protegido por Usuario)
 - [✅] **API endpoints con validación de pertenencia**
-- [ ] **Interfaz con datos del usuario actual**
+- [✅] **Interfaz con datos del usuario actual**
 - [✅] **Gestión de tipos de IVA**
 
 ---
