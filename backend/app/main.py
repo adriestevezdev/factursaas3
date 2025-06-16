@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routers import clientes, productos, seed, dashboard, facturas, perfil_empresa
+from app.api.routers import clientes, productos, seed, dashboard, facturas, perfil_empresa, billing
 
 app = FastAPI(
     title="FacturSaaS API",
@@ -25,6 +25,7 @@ app.include_router(facturas.router)
 app.include_router(perfil_empresa.router)
 app.include_router(seed.router)
 app.include_router(dashboard.router)
+app.include_router(billing.router)
 
 @app.get("/")
 def read_root():

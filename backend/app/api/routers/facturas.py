@@ -13,6 +13,8 @@ from app.schemas.factura import (
     FacturaCreate, FacturaUpdate, FacturaResponse, FacturaListResponse
 )
 from app.utils.pdf import InvoiceGenerator
+from app.core.billing import BillingService
+from app.middleware.billing import require_feature
 
 router = APIRouter(
     prefix="/api/facturas",
@@ -123,6 +125,18 @@ async def create_factura(
     db: Session = Depends(get_db)
 ):
     """Crea una nueva factura para el usuario actual."""
+    # Check plan limits
+    user_plan = BillingService.get_user_plan(current_user)
+    can_create, error_message = BillingService.check_factura_limit(
+        db, current_user["user_id"], user_plan
+    )
+    
+    if not can_create:
+        raise HTTPException(
+            status_code=403,
+            detail=error_message
+        )
+    
     # Verificar que el cliente pertenece al usuario
     cliente = db.query(Cliente).filter(
         Cliente.id == factura_data.cliente_id,
@@ -317,6 +331,14 @@ async def generate_invoice_pdf(
     db: Session = Depends(get_db)
 ):
     """Genera y descarga el PDF de una factura."""
+    # Check if user's plan has PDF export feature
+    user_plan = BillingService.get_user_plan(current_user)
+    if not BillingService.has_feature(user_plan, "pdf_export"):
+        raise HTTPException(
+            status_code=403,
+            detail=f"La exportación a PDF no está disponible en tu plan {user_plan}. Actualiza a plan Starter o Pro para acceder a esta función."
+        )
+    
     # Get invoice with relations
     factura = db.query(Factura).options(
         joinedload(Factura.cliente),
@@ -359,6 +381,14 @@ async def preview_invoice_pdf(
     db: Session = Depends(get_db)
 ):
     """Obtiene el PDF de una factura como base64 para previsualización."""
+    # Check if user's plan has PDF export feature
+    user_plan = BillingService.get_user_plan(current_user)
+    if not BillingService.has_feature(user_plan, "pdf_export"):
+        raise HTTPException(
+            status_code=403,
+            detail=f"La exportación a PDF no está disponible en tu plan {user_plan}. Actualiza a plan Starter o Pro para acceder a esta función."
+        )
+    
     # Get invoice with relations
     factura = db.query(Factura).options(
         joinedload(Factura.cliente),

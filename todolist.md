@@ -139,6 +139,67 @@
 
 ---
 
+## 💰 Fase 5: Monetización con Clerk Billing
+
+### 1. Configuración de Clerk Billing
+- [x] **Configurar planes en Clerk Dashboard**
+  - [x] Plan Free: 5 clientes, 10 facturas/mes
+  - [x] Plan Starter ($9/mes): 50 clientes, 100 facturas/mes  
+  - [x] Plan Pro ($29/mes): Ilimitado, exportación PDF, analytics avanzados
+  - [ ] Integrar con Stripe para procesamiento de pagos
+- [x] **Actualizar dependencias**
+  - [x] @clerk/nextjs versión 6.22.0 (compatible)
+  - [x] Verificar compatibilidad con Next.js 15
+
+### 2. Implementación Frontend
+- [x] **Página de precios (/pricing)**
+  - [x] Crear `frontend/src/app/pricing/page.tsx`
+  - [x] Implementar componente `<PricingTable />` de Clerk
+  - [ ] Personalizar estilos para match con la app
+- [ ] **Protección de rutas por plan**
+  - [ ] Actualizar middleware.ts para verificar planes
+  - [ ] Implementar componente `<Protect>` en rutas premium
+- [x] **Indicadores de plan en UI**
+  - [x] Crear componente `PlanBadge.tsx`
+  - [x] Mostrar límites de uso en dashboard
+  - [x] Botones de upgrade contextuales
+
+### 3. Implementación Backend
+- [x] **Middleware de verificación de planes**
+  - [x] Crear `backend/app/middleware/billing.py`
+  - [x] Verificar plan del usuario en JWT claims
+  - [x] Implementar decoradores para endpoints premium
+- [x] **Sistema de límites**
+  - [x] Crear `backend/app/core/billing.py` con lógica de planes
+  - [x] Implementar contadores de uso (clientes, facturas)
+  - [x] Añadir validación de límites en endpoints CRUD
+- [x] **Respuestas de error apropiadas**
+  - [x] Error 403 cuando se exceden límites
+  - [x] Mensajes claros indicando necesidad de upgrade
+
+### 4. Integración con Features Existentes
+- [x] **Límites en CRUD de Clientes**
+  - [x] Validar cantidad máxima según plan
+  - [x] Mostrar contador de uso en UI
+- [x] **Límites en CRUD de Facturas**
+  - [x] Validar facturas mensuales según plan
+  - [x] Reset de contador mensual (automático por fecha)
+- [x] **Features Premium**
+  - [x] Exportación PDF solo para Starter/Pro
+  - [ ] Analytics avanzados solo para Pro
+  - [ ] Personalización de plantillas solo para Pro
+
+### 5. Testing y Documentación
+- [x] **Actualizar CLAUDE.md**
+  - [x] Documentar nuevos endpoints
+  - [x] Añadir comandos de testing de planes
+- [ ] **Testing de planes**
+  - [ ] Crear usuarios de prueba con diferentes planes
+  - [ ] Verificar límites funcionan correctamente
+  - [ ] Probar flujo de upgrade/downgrade
+
+---
+
 ## 📝 Notas de Implementación
 
 - **Multi-tenancy**: Cada recurso está aislado por `user_id`

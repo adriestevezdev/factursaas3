@@ -3,6 +3,7 @@
 import { UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { PlanBadge } from '@/components/PlanBadge';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -45,6 +46,10 @@ export default function Navigation() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            <PlanBadge />
+            <Link href="/pricing" className="text-sm text-blue-600 hover:text-blue-800">
+              Mejorar plan
+            </Link>
             {user && (
               <span className="text-sm text-gray-700">
                 Hola, {user.firstName || user.emailAddresses[0].emailAddress}

@@ -30,8 +30,14 @@ class ClerkAuth:
                     if not user_id:
                         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
                     
-                    # Additional verification can be added here if needed
-                    return {"user_id": user_id, "payload": payload}
+                    # Extract user metadata including plan information
+                    public_metadata = payload.get("public_metadata", {})
+                    
+                    return {
+                        "user_id": user_id, 
+                        "payload": payload,
+                        "publicMetadata": public_metadata
+                    }
                     
                 except Exception as e:
                     raise HTTPException(status_code=401, detail="Token verification failed")
@@ -42,8 +48,15 @@ class ClerkAuth:
                 
                 if not user_id:
                     raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-                    
-                return {"user_id": user_id, "payload": payload}
+                
+                # Extract user metadata including plan information
+                public_metadata = payload.get("public_metadata", {})
+                
+                return {
+                    "user_id": user_id, 
+                    "payload": payload,
+                    "publicMetadata": public_metadata
+                }
             
         except JWTError:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")

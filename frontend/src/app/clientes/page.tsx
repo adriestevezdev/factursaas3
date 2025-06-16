@@ -5,6 +5,9 @@ import AppLayout from '@/components/AppLayout';
 import { useClientesService } from '@/services/clientes';
 import { Cliente } from '@/types';
 import ClienteModal from './ClienteModal';
+import { UsageLimits } from '@/components/UsageLimits';
+import { useBillingService } from '@/services/billing';
+import type { UsageStats } from '@/services/billing';
 
 export default function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -12,7 +15,9 @@ export default function Clientes() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const clientesService = useClientesService();
+  const billingService = useBillingService();
 
   const fetchClientes = async () => {
     try {
@@ -29,7 +34,17 @@ export default function Clientes() {
 
   useEffect(() => {
     fetchClientes();
+    fetchUsageStats();
   }, []);
+
+  const fetchUsageStats = async () => {
+    try {
+      const stats = await billingService.getUsageStats();
+      setUsageStats(stats);
+    } catch (err) {
+      console.error('Error fetching usage stats:', err);
+    }
+  };
 
   const handleCreate = () => {
     setSelectedCliente(null);
@@ -46,6 +61,7 @@ export default function Clientes() {
       try {
         await clientesService.delete(id);
         await fetchClientes();
+        await fetchUsageStats();
       } catch (err) {
         alert('Error al eliminar el cliente');
         console.error(err);
@@ -60,6 +76,7 @@ export default function Clientes() {
 
   const handleModalSuccess = async () => {
     await fetchClientes();
+    await fetchUsageStats();
     handleModalClose();
   };
 
@@ -96,6 +113,15 @@ export default function Clientes() {
         {error && (
           <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
             {error}
+          </div>
+        )}
+
+        {usageStats && (
+          <div className="mt-4">
+            <UsageLimits 
+              currentCount={usageStats.usage.clientes} 
+              resourceType="clientes" 
+            />
           </div>
         )}
 

@@ -4,16 +4,21 @@ import { useUser } from '@clerk/nextjs';
 import { useEffect, useState, useRef } from 'react';
 import AppLayout from '@/components/AppLayout';
 import { useDashboardService } from '@/services/dashboard';
+import { useBillingService } from '@/services/billing';
+import type { UsageStats } from '@/services/billing';
+import { UsageLimits } from '@/components/UsageLimits';
 
 export default function Dashboard() {
   const { user } = useUser();
   const dashboardService = useDashboardService();
+  const billingService = useBillingService();
   const [stats, setStats] = useState({
     clients: 0,
     products: 0,
     invoices: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -23,6 +28,10 @@ export default function Dashboard() {
         const data = await dashboardService.getStats();
         console.log('Dashboard stats received:', data);
         setStats(data);
+        
+        // Fetch usage stats
+        const usage = await billingService.getUsageStats();
+        setUsageStats(usage);
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
       } finally {
@@ -34,7 +43,7 @@ export default function Dashboard() {
       hasFetchedRef.current = true;
       fetchStats();
     }
-  }, [user, dashboardService]);
+  }, [user, dashboardService, billingService]);
 
   return (
     <AppLayout>
@@ -115,6 +124,19 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {usageStats && (
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <UsageLimits 
+              currentCount={usageStats.usage.clientes} 
+              resourceType="clientes" 
+            />
+            <UsageLimits 
+              currentCount={usageStats.usage.facturas_este_mes} 
+              resourceType="facturas" 
+            />
+          </div>
+        )}
 
         <div className="mt-8">
           <div className="bg-white shadow rounded-lg">

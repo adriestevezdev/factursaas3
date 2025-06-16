@@ -6,6 +6,7 @@ from app.db.database import get_db
 from app.models.cliente import Cliente
 from app.schemas.cliente import ClienteCreate, ClienteUpdate, ClienteResponse
 from app.middleware.auth import get_current_user
+from app.core.billing import BillingService
 
 router = APIRouter(
     prefix="/api/clientes",
@@ -52,6 +53,18 @@ def create_cliente(
     db: Session = Depends(get_db)
 ):
     """Create a new client"""
+    # Check plan limits
+    user_plan = BillingService.get_user_plan(current_user)
+    can_create, error_message = BillingService.check_cliente_limit(
+        db, current_user["user_id"], user_plan
+    )
+    
+    if not can_create:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=error_message
+        )
+    
     db_cliente = Cliente(
         **cliente.model_dump(),
         user_id=current_user["user_id"]

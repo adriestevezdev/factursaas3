@@ -32,6 +32,10 @@ Note: Seed data creates 8 Spanish clients, 15 products/services, and 12 invoices
 - **List clients**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/clientes`
 - **List products**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/productos`
 - **List invoices**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/facturas`
+- **Billing endpoints**:
+  - `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/billing/plan`
+  - `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/billing/usage`
+  - `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/billing/plans`
 - **Test endpoints** (without auth):
   - `curl http://localhost:8000/dashboard/stats/test/user_test_seed_12345`
   - `curl http://localhost:8000/api/facturas/test/user_test_seed_12345`
@@ -93,6 +97,18 @@ Note: `DATABASE_URL` is auto-configured in Docker Compose
 - Database: localhost:5432
 - Adminer (DB admin): http://localhost:8080
 
+## Billing Plans Configuration
+
+### Available Plans
+- **Free** (free_user): 5 clientes, 10 facturas/mes, sin PDF
+- **Starter** (starter - $9/mes): 50 clientes, 100 facturas/mes, exportación PDF
+- **Pro** (pro - $29/mes): Ilimitado, todas las características
+
+### Clerk Plan IDs
+- Free: `free_user`
+- Starter: `cplan_2yaGm3bYVgN4D3JEYwZOzTZSabD` (slug: starter)
+- Pro: `cplan_2yaFQF2LIQow2BDQjtStX0zbVsg` (slug: pro)
+
 ## Important Implementation Patterns
 
 ### Multi-tenant Data Access
@@ -130,7 +146,15 @@ const newClient = await createCliente(clientData);
     - Create/Edit forms with line items management
     - Detailed view with status management
     - Automatic calculations for subtotals and taxes
-- **Phase 4**: Not started (PDF generation, dashboard metrics, business profile)
+- **Phase 4 (Business Features)**: ✅ Complete
+  - ✅ PDF generation with ReportLab
+  - ✅ Business profile configuration
+- **Phase 5 (Monetization)**: 🚧 In Progress
+  - ✅ Clerk Billing plan configuration (Free, Starter, Pro)
+  - ✅ Backend billing middleware and limits
+  - ✅ Frontend usage indicators and limits
+  - ✅ Plan-based feature access (PDF export)
+  - ⏳ Clerk PricingTable integration pending
 
 ## Task Management
 **IMPORTANT**: Always review the `todolist.md` file to track project progress. When implementing new functionality, add a checkmark (✅) to completed tasks in `todolist.md` to differentiate them from pending tasks. This helps maintain clear visibility of project status and completed work.

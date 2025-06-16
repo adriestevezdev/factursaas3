@@ -10,3 +10,4 @@ httpx==0.28.1
 clerk-backend-api==3.0.3
 python-multipart==0.0.20
 reportlab==4.0.8
+svix==1.4.12

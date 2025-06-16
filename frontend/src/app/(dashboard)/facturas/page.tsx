@@ -9,6 +9,9 @@ import { Plus, Eye, Edit, Trash2, FileText, Download } from 'lucide-react';
 import Link from 'next/link';
 import AppLayout from '@/components/AppLayout';
 import toast from 'react-hot-toast';
+import { UsageLimits } from '@/components/UsageLimits';
+import { useBillingService } from '@/services/billing';
+import type { UsageStats } from '@/services/billing';
 // import { format } from 'date-fns';
 // import { es } from 'date-fns/locale';
 
@@ -30,11 +33,23 @@ export default function FacturasPage() {
   const [facturas, setFacturas] = useState<FacturaListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEstado, setSelectedEstado] = useState<EstadoFactura | ''>('');
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const facturasService = useFacturasService();
+  const billingService = useBillingService();
 
   useEffect(() => {
     loadFacturas();
+    loadUsageStats();
   }, [selectedEstado]);
+
+  const loadUsageStats = async () => {
+    try {
+      const stats = await billingService.getUsageStats();
+      setUsageStats(stats);
+    } catch (err) {
+      console.error('Error fetching usage stats:', err);
+    }
+  };
 
   const loadFacturas = async () => {
     try {
@@ -54,6 +69,7 @@ export default function FacturasPage() {
       try {
         await facturasService.delete(id);
         await loadFacturas();
+        await loadUsageStats();
       } catch (error) {
         console.error('Error deleting factura:', error);
       }
@@ -93,6 +109,15 @@ export default function FacturasPage() {
           </Button>
         </Link>
       </div>
+
+      {usageStats && (
+        <div className="mb-6">
+          <UsageLimits 
+            currentCount={usageStats.usage.facturas_este_mes} 
+            resourceType="facturas" 
+          />
+        </div>
+      )}
 
       <Card className="mb-6 p-4">
         <div className="flex items-center gap-4">
