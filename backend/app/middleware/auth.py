@@ -50,5 +50,5 @@ class ClerkAuth:
 
 clerk_auth = ClerkAuth()
 
-async def get_current_user(auth_data: dict = Security(clerk_auth.verify_token)) -> str:
-    return auth_data["user_id"]
+async def get_current_user(auth_data: dict = Security(clerk_auth.verify_token)) -> dict:
+    return auth_data

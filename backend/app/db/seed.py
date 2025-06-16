@@ -2,8 +2,11 @@ from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.models.cliente import Cliente
 from app.models.producto import Producto
+from app.models.factura import Factura, LineaFactura, EstadoFactura
 from decimal import Decimal
+from datetime import date, timedelta
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -267,36 +270,98 @@ def seed_database():
         # Check if seed data already exists
         existing_clients = db.query(Cliente).filter(Cliente.user_id == SEED_USER_ID).count()
         existing_products = db.query(Producto).filter(Producto.user_id == SEED_USER_ID).count()
+        existing_invoices = db.query(Factura).filter(Factura.user_id == SEED_USER_ID).count()
         
-        if existing_clients > 0 or existing_products > 0:
-            logger.warning(f"Seed data already exists: {existing_clients} clients, {existing_products} products")
-            return {"message": "Seed data already exists", "clients": existing_clients, "products": existing_products}
+        if existing_clients > 0 or existing_products > 0 or existing_invoices > 0:
+            logger.warning(f"Seed data already exists: {existing_clients} clients, {existing_products} products, {existing_invoices} invoices")
+            return {"message": "Seed data already exists", "clients": existing_clients, "products": existing_products, "invoices": existing_invoices}
         
         # Insert sample clients
         clients_data = get_sample_clients()
+        clients = []
         clients_created = 0
         for client_data in clients_data:
             client = Cliente(**client_data)
             db.add(client)
             db.flush()  # Ensure the database generates timestamps
+            clients.append(client)
             clients_created += 1
         
         # Insert sample products
         products_data = get_sample_products()
+        products = []
         products_created = 0
         for product_data in products_data:
             product = Producto(**product_data)
             db.add(product)
             db.flush()  # Ensure the database generates timestamps
+            products.append(product)
             products_created += 1
         
+        # Create sample invoices
+        invoices_created = 0
+        
+        # Generate invoices for the last 3 months
+        today = date.today()
+        for i in range(12):  # Create 12 invoices
+            invoice_date = today - timedelta(days=random.randint(1, 90))
+            client = random.choice(clients)
+            
+            # Determine invoice status based on date
+            if (today - invoice_date).days > 60:
+                estado = EstadoFactura.PAGADA
+            elif (today - invoice_date).days > 30:
+                estado = EstadoFactura.ENVIADA
+            else:
+                estado = EstadoFactura.BORRADOR
+            
+            # Create invoice
+            invoice = Factura(
+                numero=f"2025-{i+1:04d}",
+                fecha=invoice_date,
+                cliente_id=client.id,
+                estado=estado,
+                user_id=SEED_USER_ID,
+                notas="Factura generada automáticamente para pruebas"
+            )
+            
+            # Add invoice lines (1-4 random products)
+            num_lines = random.randint(1, 4)
+            selected_products = random.sample(products, num_lines)
+            
+            subtotal = Decimal('0.00')
+            total_iva = Decimal('0.00')
+            
+            for product in selected_products:
+                cantidad = Decimal(str(random.randint(1, 5)))
+                linea = LineaFactura(
+                    producto_id=product.id,
+                    descripcion=product.descripcion,
+                    cantidad=cantidad,
+                    precio_unitario=product.precio,
+                    tipo_iva=product.tipo_iva,
+                    subtotal=cantidad * product.precio
+                )
+                invoice.lineas.append(linea)
+                
+                subtotal += linea.subtotal
+                total_iva += linea.subtotal * (linea.tipo_iva / 100)
+            
+            invoice.subtotal = subtotal
+            invoice.total_iva = total_iva
+            invoice.total = subtotal + total_iva
+            
+            db.add(invoice)
+            invoices_created += 1
+        
         db.commit()
-        logger.info(f"Database seeded successfully: {clients_created} clients, {products_created} products")
+        logger.info(f"Database seeded successfully: {clients_created} clients, {products_created} products, {invoices_created} invoices")
         
         return {
             "message": "Database seeded successfully",
             "clients_created": clients_created,
             "products_created": products_created,
+            "invoices_created": invoices_created,
             "test_user_id": SEED_USER_ID
         }
         
@@ -313,6 +378,9 @@ def cleanup_seed_data():
     try:
         logger.info("Starting seed data cleanup...")
         
+        # Delete seed invoices (this will cascade delete invoice lines)
+        invoices_deleted = db.query(Factura).filter(Factura.user_id == SEED_USER_ID).delete()
+        
         # Delete seed clients
         clients_deleted = db.query(Cliente).filter(Cliente.user_id == SEED_USER_ID).delete()
         
@@ -320,12 +388,13 @@ def cleanup_seed_data():
         products_deleted = db.query(Producto).filter(Producto.user_id == SEED_USER_ID).delete()
         
         db.commit()
-        logger.info(f"Seed data cleaned up: {clients_deleted} clients, {products_deleted} products deleted")
+        logger.info(f"Seed data cleaned up: {clients_deleted} clients, {products_deleted} products, {invoices_deleted} invoices deleted")
         
         return {
             "message": "Seed data cleaned up successfully",
             "clients_deleted": clients_deleted,
-            "products_deleted": products_deleted
+            "products_deleted": products_deleted,
+            "invoices_deleted": invoices_deleted
         }
         
     except Exception as e:
@@ -341,12 +410,14 @@ def get_seed_stats():
     try:
         clients_count = db.query(Cliente).filter(Cliente.user_id == SEED_USER_ID).count()
         products_count = db.query(Producto).filter(Producto.user_id == SEED_USER_ID).count()
+        invoices_count = db.query(Factura).filter(Factura.user_id == SEED_USER_ID).count()
         
         return {
             "test_user_id": SEED_USER_ID,
             "clients": clients_count,
             "products": products_count,
-            "has_seed_data": clients_count > 0 or products_count > 0
+            "invoices": invoices_count,
+            "has_seed_data": clients_count > 0 or products_count > 0 or invoices_count > 0
         }
         
     finally:

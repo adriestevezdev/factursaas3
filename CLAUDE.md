@@ -5,8 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ### Development
-- `docker compose up -d`: Start all services (PostgreSQL, FastAPI backend, Next.js frontend)
-- `docker compose exec backend alembic upgrade head`: Run database migrations (required after first startup)
+- `docker compose up -d`: Start all services (PostgreSQL, FastAPI backend, Next.js frontend). Database migrations run automatically on startup.
 - `docker compose logs -f backend`: View backend logs
 - `docker compose logs -f frontend`: View frontend logs
 - `docker compose down`: Stop all services
@@ -26,12 +25,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Run seed script directly**: `docker compose exec backend python -m app.db.seed`
 - **Clean seed data directly**: `docker compose exec backend python -m app.db.seed cleanup`
 
-Note: Seed data creates 8 Spanish clients and 15 products/services with realistic data
+Note: Seed data creates 8 Spanish clients, 15 products/services, and 12 invoices with realistic data
 
 ### API Testing
 - **Dashboard stats**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/dashboard/stats`
 - **List clients**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/clientes`
 - **List products**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/productos`
+- **List invoices**: `curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:8000/api/facturas`
+- **Test endpoints** (without auth):
+  - `curl http://localhost:8000/dashboard/stats/test/user_test_seed_12345`
+  - `curl http://localhost:8000/api/facturas/test/user_test_seed_12345`
 - API documentation available at http://localhost:8000/docs
 
 ### Frontend (Next.js)
@@ -114,12 +117,20 @@ const newClient = await createCliente(clientData);
 
 ## Current Project Status
 - **Phase 1 (Infrastructure)**: ✅ Complete
-- **Phase 2 (Core Features)**: Partially complete
+- **Phase 2 (Core Features)**: ✅ Complete
   - ✅ Cliente CRUD with multi-tenant support
   - ✅ Producto CRUD with multi-tenant support  
   - ✅ Database seeding and dashboard stats
-  - ⏳ Invoice (Factura) system pending
-- **Phase 3 & 4**: Not started (invoicing, PDF generation, advanced features)
+- **Phase 3 (Invoicing System)**: ✅ Complete
+  - ✅ Factura backend API with full CRUD operations
+  - ✅ Automatic invoice numbering per user
+  - ✅ Multi-tenant validation and security
+  - ✅ Frontend interface with full functionality:
+    - List view with filters and actions
+    - Create/Edit forms with line items management
+    - Detailed view with status management
+    - Automatic calculations for subtotals and taxes
+- **Phase 4**: Not started (PDF generation, dashboard metrics, business profile)
 
 ## Task Management
 **IMPORTANT**: Always review the `todolist.md` file to track project progress. When implementing new functionality, add a checkmark (✅) to completed tasks in `todolist.md` to differentiate them from pending tasks. This helps maintain clear visibility of project status and completed work.

@@ -16,25 +16,25 @@ router = APIRouter(
 def get_clientes(
     skip: int = 0,
     limit: int = 100,
-    user_id: str = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all clients for the authenticated user"""
     clientes = db.query(Cliente).filter(
-        Cliente.user_id == user_id
+        Cliente.user_id == current_user["user_id"]
     ).offset(skip).limit(limit).all()
     return clientes
 
 @router.get("/{cliente_id}", response_model=ClienteResponse)
 def get_cliente(
     cliente_id: int,
-    user_id: str = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get a specific client by ID"""
     cliente = db.query(Cliente).filter(
         Cliente.id == cliente_id,
-        Cliente.user_id == user_id
+        Cliente.user_id == current_user["user_id"]
     ).first()
     
     if not cliente:
@@ -48,13 +48,13 @@ def get_cliente(
 @router.post("/", response_model=ClienteResponse, status_code=status.HTTP_201_CREATED)
 def create_cliente(
     cliente: ClienteCreate,
-    user_id: str = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new client"""
     db_cliente = Cliente(
         **cliente.model_dump(),
-        user_id=user_id
+        user_id=current_user["user_id"]
     )
     db.add(db_cliente)
     db.commit()
@@ -65,13 +65,13 @@ def create_cliente(
 def update_cliente(
     cliente_id: int,
     cliente_update: ClienteUpdate,
-    user_id: str = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update a client"""
     db_cliente = db.query(Cliente).filter(
         Cliente.id == cliente_id,
-        Cliente.user_id == user_id
+        Cliente.user_id == current_user["user_id"]
     ).first()
     
     if not db_cliente:
@@ -91,13 +91,13 @@ def update_cliente(
 @router.delete("/{cliente_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_cliente(
     cliente_id: int,
-    user_id: str = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Delete a client"""
     db_cliente = db.query(Cliente).filter(
         Cliente.id == cliente_id,
-        Cliente.user_id == user_id
+        Cliente.user_id == current_user["user_id"]
     ).first()
     
     if not db_cliente:

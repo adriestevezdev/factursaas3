@@ -47,6 +47,7 @@
 - [x] **Crear script de seed (backend/app/db/seed.py)** ✅
   - [x] Datos de ejemplo de clientes (8 registros con datos realistas españoles) ✅
   - [x] Datos de ejemplo de productos/servicios (15 registros con precios y IVA) ✅
+  - [x] Datos de ejemplo de facturas (12 registros con diferentes estados) ✅
   - [x] Usar un user_id de prueba consistente (`user_test_seed_12345`) ✅
 - [x] **Crear comando para ejecutar el seed** ✅
   - [x] Endpoints REST: POST/DELETE/PUT `/api/seed/` ✅
@@ -60,18 +61,37 @@
 
 ## 🧾 Fase 3: Sistema de Facturación Multi-tenant
 
-### 1. Crear Factura con Seguridad
-- [ ] **Validar que cliente y productos pertenecen al usuario**
-- [ ] Formulario con selección de SUS clientes
-- [ ] Añadir líneas de SUS productos
-- [ ] Cálculo automático de totales e IVA
-- [ ] Numeración automática de facturas por usuario
+### 1. Backend de Facturas ✅
+- [x] **Modelos de Factura y LineaFactura con SQLAlchemy** ✅
+- [x] **Migración de Alembic para tablas facturas y lineas_factura** ✅
+- [x] **Schemas Pydantic para validación** ✅
+- [x] **Endpoints CRUD con validación multi-tenant** ✅
+  - [x] GET /api/facturas - Lista facturas del usuario
+  - [x] GET /api/facturas/{id} - Detalle de factura
+  - [x] POST /api/facturas - Crear factura
+  - [x] PUT /api/facturas/{id} - Actualizar factura
+  - [x] DELETE /api/facturas/{id} - Eliminar factura
+- [x] **Numeración automática de facturas por usuario** ✅
+- [x] **Validación que cliente y productos pertenecen al usuario** ✅
+- [x] **Cálculo automático de totales e IVA** ✅
 
-### 2. Lista y Vista de Facturas
-- [ ] **Filtrado automático por `user_id`**
-- [ ] Estados: borrador, enviada, pagada
-- [ ] Vista detallada con verificación de pertenencia
-- [ ] Búsqueda y filtros avanzados
+### 2. Frontend de Facturas ✅
+- [x] Lista de facturas con tabla y filtros ✅
+  - [x] Tabla con información de facturas
+  - [x] Filtro por estado
+  - [x] Acciones de ver, editar y eliminar
+- [x] Formulario de creación/edición ✅
+  - [x] Selección de cliente
+  - [x] Gestión de líneas de factura
+  - [x] Cálculo automático de totales
+  - [x] Selección de productos con auto-completado de datos
+- [x] Vista detallada de factura ✅
+  - [x] Información completa del cliente
+  - [x] Detalle de líneas y totales
+  - [x] Visualización de notas
+- [x] Gestión de estados de factura ✅
+  - [x] Cambio de estado desde la vista detallada
+  - [x] Indicadores visuales por estado
 
 ---
 
@@ -80,7 +100,6 @@
 ### 1. Generación de PDF
 - [ ] Plantilla personalizable por usuario
 - [ ] Logo de empresa del usuario
-- [ ] Envío por email
 
 ### 2. Dashboard con métricas por usuario
 - [ ] Facturas del mes
