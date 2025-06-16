@@ -8,8 +8,10 @@ import { useFacturasService } from '@/services/facturas';
 import { useClientesService } from '@/services/clientes';
 import { Factura, EstadoFactura } from '@/types/factura';
 import { Cliente } from '@/types';
-import { Edit, ArrowLeft, Printer, Mail } from 'lucide-react';
+import { Edit, ArrowLeft, Printer, Mail, Download } from 'lucide-react';
 import Link from 'next/link';
+import AppLayout from '@/components/AppLayout';
+import toast from 'react-hot-toast';
 
 const estadoColors = {
   [EstadoFactura.BORRADOR]: 'bg-gray-500',
@@ -76,24 +78,37 @@ export default function FacturaDetailPage() {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!factura) return;
+    
+    try {
+      await facturasService.downloadPdf(factura.id!);
+      toast.success('PDF descargado correctamente');
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('Error al descargar el PDF');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="container mx-auto py-6">
+      <AppLayout>
         <p>Cargando factura...</p>
-      </div>
+      </AppLayout>
     );
   }
 
   if (!factura) {
     return (
-      <div className="container mx-auto py-6">
+      <AppLayout>
         <p>Factura no encontrada</p>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <AppLayout>
+      <div>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-4">
           <Link href="/facturas">
@@ -110,9 +125,9 @@ export default function FacturaDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" disabled>
-            <Printer className="mr-2 h-4 w-4" />
-            Imprimir
+          <Button variant="outline" onClick={handleDownloadPdf}>
+            <Download className="mr-2 h-4 w-4" />
+            Descargar PDF
           </Button>
           <Button variant="outline" disabled>
             <Mail className="mr-2 h-4 w-4" />
@@ -264,6 +279,7 @@ export default function FacturaDetailPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

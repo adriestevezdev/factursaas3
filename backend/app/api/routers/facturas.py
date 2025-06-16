@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, extract
 from typing import List, Optional
@@ -7,10 +8,11 @@ from decimal import Decimal
 
 from app.db.database import get_db
 from app.middleware.auth import get_current_user
-from app.models import Factura, LineaFactura, Cliente, Producto
+from app.models import Factura, LineaFactura, Cliente, Producto, PerfilEmpresa
 from app.schemas.factura import (
     FacturaCreate, FacturaUpdate, FacturaResponse, FacturaListResponse
 )
+from app.utils.pdf import InvoiceGenerator
 
 router = APIRouter(
     prefix="/api/facturas",
@@ -305,3 +307,101 @@ async def get_facturas_test(
     facturas = query.order_by(Factura.fecha.desc(), Factura.id.desc()).offset(skip).limit(limit).all()
     
     return facturas
+
+# PDF Generation endpoints
+@router.get("/{factura_id}/pdf")
+async def generate_invoice_pdf(
+    factura_id: int,
+    template: str = Query("modern", description="Template name"),
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Genera y descarga el PDF de una factura."""
+    # Get invoice with relations
+    factura = db.query(Factura).options(
+        joinedload(Factura.cliente),
+        joinedload(Factura.lineas)
+    ).filter(
+        Factura.id == factura_id,
+        Factura.user_id == current_user["user_id"]
+    ).first()
+    
+    if not factura:
+        raise HTTPException(status_code=404, detail="Factura no encontrada")
+    
+    # Get business profile if exists
+    perfil_empresa = db.query(PerfilEmpresa).filter(
+        PerfilEmpresa.user_id == current_user["user_id"]
+    ).first()
+    
+    try:
+        # Generate PDF
+        pdf_buffer = InvoiceGenerator.generate_pdf(factura, template, perfil_empresa)
+        
+        # Return as downloadable file
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename=factura_{factura.numero}.pdf"
+            }
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error al generar el PDF")
+
+@router.get("/{factura_id}/pdf/preview")
+async def preview_invoice_pdf(
+    factura_id: int,
+    template: str = Query("modern", description="Template name"),
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Obtiene el PDF de una factura como base64 para previsualización."""
+    # Get invoice with relations
+    factura = db.query(Factura).options(
+        joinedload(Factura.cliente),
+        joinedload(Factura.lineas)
+    ).filter(
+        Factura.id == factura_id,
+        Factura.user_id == current_user["user_id"]
+    ).first()
+    
+    if not factura:
+        raise HTTPException(status_code=404, detail="Factura no encontrada")
+    
+    # Get business profile if exists
+    perfil_empresa = db.query(PerfilEmpresa).filter(
+        PerfilEmpresa.user_id == current_user["user_id"]
+    ).first()
+    
+    try:
+        # Generate PDF as base64
+        pdf_base64 = InvoiceGenerator.generate_pdf_base64(factura, template, perfil_empresa)
+        
+        return {
+            "pdf_base64": pdf_base64,
+            "filename": f"factura_{factura.numero}.pdf"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error al generar el PDF")
+
+@router.get("/templates")
+async def get_available_templates(
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtiene la lista de plantillas disponibles para PDF."""
+    templates = InvoiceGenerator.get_available_templates()
+    return {
+        "templates": [
+            {
+                "id": template,
+                "name": template.capitalize(),
+                "description": f"Plantilla {template} para facturas"
+            }
+            for template in templates
+        ]
+    }

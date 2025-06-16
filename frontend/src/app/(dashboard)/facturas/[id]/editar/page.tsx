@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import FacturaForm from '@/components/facturas/FacturaForm';
 import { useFacturasService } from '@/services/facturas';
 import { Factura } from '@/types/factura';
+import AppLayout from '@/components/AppLayout';
 
 export default function EditarFacturaPage() {
   const params = useParams();
@@ -31,28 +32,30 @@ export default function EditarFacturaPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-6">
+      <AppLayout>
         <p>Cargando factura...</p>
-      </div>
+      </AppLayout>
     );
   }
 
   if (!factura) {
     return (
-      <div className="container mx-auto py-6">
+      <AppLayout>
         <p>Factura no encontrada</p>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <AppLayout>
+      <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Editar Factura #{factura.numero}</h1>
         <p className="text-gray-600 mt-1">Modifica los datos de la factura</p>
       </div>
 
       <FacturaForm factura={factura} isEditing />
-    </div>
+      </div>
+    </AppLayout>
   );
 }

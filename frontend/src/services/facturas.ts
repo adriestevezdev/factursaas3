@@ -41,5 +41,13 @@ export function useFacturasService() {
     delete: async (id: number) => {
       return api.delete<void>(`/api/facturas/${id}`);
     },
+
+    downloadPdf: async (id: number, template: string = 'modern') => {
+      await api.download(`/api/facturas/${id}/pdf?template=${template}`, `factura_${id}.pdf`);
+    },
+
+    getAvailableTemplates: async () => {
+      return api.get<{ templates: Array<{ id: string; name: string; description: string }> }>('/api/facturas/templates');
+    },
   };
 }

@@ -14,7 +14,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Import the database configuration and models
 from app.core.config import settings
 from app.db.database import Base
-from app.models import cliente, producto, factura  # Import all models
+from app.models import cliente, producto, factura, perfil_empresa  # Import all models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

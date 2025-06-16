@@ -5,8 +5,10 @@ import { useFacturasService } from '@/services/facturas';
 import { FacturaListItem, EstadoFactura } from '@/types/factura';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Edit, Trash2, FileText } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, FileText, Download } from 'lucide-react';
 import Link from 'next/link';
+import AppLayout from '@/components/AppLayout';
+import toast from 'react-hot-toast';
 // import { format } from 'date-fns';
 // import { es } from 'date-fns/locale';
 
@@ -58,6 +60,17 @@ export default function FacturasPage() {
     }
   };
 
+  const handleDownloadPdf = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation if clicked inside a link
+    try {
+      await facturasService.downloadPdf(id);
+      toast.success('PDF descargado correctamente');
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('Error al descargar el PDF');
+    }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
@@ -66,7 +79,8 @@ export default function FacturasPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <AppLayout>
+      <div>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Facturas</h1>
@@ -145,18 +159,27 @@ export default function FacturasPage() {
                     <td className="p-4">
                       <div className="flex gap-2">
                         <Link href={`/facturas/${factura.id}`}>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="Ver">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Descargar PDF"
+                          onClick={(e) => handleDownloadPdf(factura.id, e)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
                         <Link href={`/facturas/${factura.id}/editar`}>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="Editar">
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
                         <Button
                           variant="ghost"
                           size="sm"
+                          title="Eliminar"
                           onClick={() => handleDelete(factura.id)}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
@@ -170,6 +193,7 @@ export default function FacturasPage() {
           </table>
         </div>
       </Card>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

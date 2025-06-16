@@ -9,6 +9,7 @@ const navItems = [
   { href: '/clientes', label: 'Clientes' },
   { href: '/productos', label: 'Productos' },
   { href: '/facturas', label: 'Facturas' },
+  { href: '/configuracion', label: 'Configuración' },
 ];
 
 export default function Navigation() {

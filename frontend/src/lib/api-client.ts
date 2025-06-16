@@ -52,5 +52,26 @@ export function useApiClient() {
         body: JSON.stringify(data),
       }),
     delete: <T>(endpoint: string) => apiCall<T>(endpoint, { method: 'DELETE' }),
+    download: async (endpoint: string, filename?: string) => {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'GET',
+        headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || 'download';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    },
   };
 }
