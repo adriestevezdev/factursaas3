@@ -109,6 +109,13 @@ Note: `DATABASE_URL` is auto-configured in Docker Compose
 - Starter: `cplan_2yaGm3bYVgN4D3JEYwZOzTZSabD` (slug: starter)
 - Pro: `cplan_2yaFQF2LIQow2BDQjtStX0zbVsg` (slug: pro)
 
+### Implementation Details
+- **NO WEBHOOKS REQUIRED**: The system uses Clerk's JWT claim `pla` to get the user's current plan
+- Plan information is extracted directly from the JWT in each request
+- Format: `"pla": "u:plan_name"` for user plans or `"pla": "o:plan_name"` for organization plans
+- Frontend components fetch plan info via API instead of using `publicMetadata`
+- This ensures real-time updates when users change their subscription
+
 ## Important Implementation Patterns
 
 ### Multi-tenant Data Access

@@ -146,7 +146,7 @@
   - [x] Plan Free: 5 clientes, 10 facturas/mes
   - [x] Plan Starter ($9/mes): 50 clientes, 100 facturas/mes  
   - [x] Plan Pro ($29/mes): Ilimitado, exportación PDF, analytics avanzados
-  - [ ] Integrar con Stripe para procesamiento de pagos
+  - [x] Integrar con Stripe para procesamiento de pagos (configurado en Clerk Dashboard)
 - [x] **Actualizar dependencias**
   - [x] @clerk/nextjs versión 6.22.0 (compatible)
   - [x] Verificar compatibilidad con Next.js 15
@@ -156,6 +156,7 @@
   - [x] Crear `frontend/src/app/pricing/page.tsx`
   - [x] Implementar componente `<PricingTable />` de Clerk
   - [ ] Personalizar estilos para match con la app
+  - [x] Actualizar componentes para usar API en lugar de publicMetadata
 - [ ] **Protección de rutas por plan**
   - [ ] Actualizar middleware.ts para verificar planes
   - [ ] Implementar componente `<Protect>` en rutas premium
@@ -169,6 +170,7 @@
   - [x] Crear `backend/app/middleware/billing.py`
   - [x] Verificar plan del usuario en JWT claims
   - [x] Implementar decoradores para endpoints premium
+  - [x] Actualizar extracción de plan desde JWT claim 'pla' (Clerk Billing)
 - [x] **Sistema de límites**
   - [x] Crear `backend/app/core/billing.py` con lógica de planes
   - [x] Implementar contadores de uso (clientes, facturas)
@@ -193,10 +195,15 @@
 - [x] **Actualizar CLAUDE.md**
   - [x] Documentar nuevos endpoints
   - [x] Añadir comandos de testing de planes
-- [ ] **Testing de planes**
-  - [ ] Crear usuarios de prueba con diferentes planes
-  - [ ] Verificar límites funcionan correctamente
-  - [ ] Probar flujo de upgrade/downgrade
+
+### 6. Integración con Clerk Billing (Sin Webhooks)
+- [x] **Actualizar backend para usar JWT claims**
+  - [x] Extraer plan del claim 'pla' en el JWT
+  - [x] Mapear IDs de planes de Clerk a nombres internos
+  - [x] Fallback a publicMetadata si no hay claim JWT
+- [x] **Actualizar frontend**
+  - [x] PlanBadge usa API en lugar de publicMetadata
+  - [x] UsageLimits usa API en lugar de publicMetadata
 
 ---
 

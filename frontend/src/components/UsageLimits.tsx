@@ -1,10 +1,11 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs'
+import { useEffect, useState } from 'react'
 import { Progress } from '@/components/ui/progress'
 import { AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { useBillingService } from '@/services/billing'
 
 interface UsageLimitsProps {
   currentCount: number
@@ -27,13 +28,30 @@ const PLAN_LIMITS = {
 }
 
 export function UsageLimits({ currentCount, resourceType }: UsageLimitsProps) {
-  const { user } = useUser()
-  const userPlan = user?.publicMetadata?.plan as string || 'free_user'
+  const [userPlan, setUserPlan] = useState<string>('free_user')
+  const [loading, setLoading] = useState(true)
+  const billingService = useBillingService()
+  
+  useEffect(() => {
+    const fetchPlan = async () => {
+      try {
+        const planInfo = await billingService.getUserPlan()
+        setUserPlan(planInfo.plan)
+      } catch (error) {
+        console.error('Error fetching plan:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchPlan()
+  }, [billingService])
+  
   const limits = PLAN_LIMITS[userPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free_user
   const limit = limits[resourceType]
   
-  // Don't show for unlimited plans
-  if (limit === -1) return null
+  // Don't show for unlimited plans or while loading
+  if (loading || limit === -1) return null
   
   const percentage = (currentCount / limit) * 100
   const isNearLimit = percentage >= 80

@@ -41,7 +41,13 @@ class BillingService:
     
     @staticmethod
     def get_user_plan(user_metadata: dict) -> str:
-        """Extract user plan from Clerk metadata"""
+        """Extract user plan from JWT claims or metadata"""
+        # First try to get plan from JWT claim (Clerk Billing)
+        plan = user_metadata.get("plan")
+        if plan:
+            return plan
+        
+        # Fallback to publicMetadata if JWT claim not available
         return user_metadata.get("publicMetadata", {}).get("plan", "free_user")
     
     @staticmethod

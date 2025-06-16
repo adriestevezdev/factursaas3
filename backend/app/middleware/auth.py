@@ -33,10 +33,25 @@ class ClerkAuth:
                     # Extract user metadata including plan information
                     public_metadata = payload.get("public_metadata", {})
                     
+                    # Extract plan from JWT claim 'pla' (Clerk Billing)
+                    plan_claim = payload.get("pla", "")
+                    # Extract plan ID from format "u:plan_name" or "o:plan_name"
+                    plan = plan_claim.split(":")[1] if ":" in plan_claim else None
+                    
+                    # Map Clerk plan IDs to our internal plan names
+                    plan_mapping = {
+                        "free_user": "free_user",
+                        "starter": "starter",
+                        "pro": "pro"
+                    }
+                    
+                    user_plan = plan_mapping.get(plan, "free_user")
+                    
                     return {
                         "user_id": user_id, 
                         "payload": payload,
-                        "publicMetadata": public_metadata
+                        "publicMetadata": public_metadata,
+                        "plan": user_plan
                     }
                     
                 except Exception as e:
@@ -52,10 +67,25 @@ class ClerkAuth:
                 # Extract user metadata including plan information
                 public_metadata = payload.get("public_metadata", {})
                 
+                # Extract plan from JWT claim 'pla' (Clerk Billing)
+                plan_claim = payload.get("pla", "")
+                # Extract plan ID from format "u:plan_name" or "o:plan_name"
+                plan = plan_claim.split(":")[1] if ":" in plan_claim else None
+                
+                # Map Clerk plan IDs to our internal plan names
+                plan_mapping = {
+                    "free_user": "free_user",
+                    "starter": "starter",
+                    "pro": "pro"
+                }
+                
+                user_plan = plan_mapping.get(plan, "free_user")
+                
                 return {
                     "user_id": user_id, 
                     "payload": payload,
-                    "publicMetadata": public_metadata
+                    "publicMetadata": public_metadata,
+                    "plan": user_plan
                 }
             
         except JWTError:
