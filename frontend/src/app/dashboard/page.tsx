@@ -1,10 +1,40 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
+import { useEffect, useState, useRef } from 'react';
 import AppLayout from '@/components/AppLayout';
+import { useDashboardService } from '@/services/dashboard';
 
 export default function Dashboard() {
   const { user } = useUser();
+  const dashboardService = useDashboardService();
+  const [stats, setStats] = useState({
+    clients: 0,
+    products: 0,
+    invoices: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const hasFetchedRef = useRef(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        console.log('Fetching dashboard stats...');
+        const data = await dashboardService.getStats();
+        console.log('Dashboard stats received:', data);
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      fetchStats();
+    }
+  }, [user, dashboardService]);
 
   return (
     <AppLayout>
@@ -32,7 +62,9 @@ export default function Dashboard() {
                     <dt className="text-sm font-medium text-gray-500 truncate">
                       Total Clientes
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">0</dd>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {loading ? '...' : stats.clients}
+                    </dd>
                   </dl>
                 </div>
               </div>
@@ -52,7 +84,9 @@ export default function Dashboard() {
                     <dt className="text-sm font-medium text-gray-500 truncate">
                       Total Productos
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">0</dd>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {loading ? '...' : stats.products}
+                    </dd>
                   </dl>
                 </div>
               </div>
@@ -72,7 +106,9 @@ export default function Dashboard() {
                     <dt className="text-sm font-medium text-gray-500 truncate">
                       Total Facturas
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">0</dd>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {loading ? '...' : stats.invoices}
+                    </dd>
                   </dl>
                 </div>
               </div>
